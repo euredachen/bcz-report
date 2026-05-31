@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>百词斩 · 产品深度分析 | 体验洞察与设计重构</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #e8e8ed; /* 灰色背景凸显高级感 */
+            color: #1c1c1e;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* 深蓝作为重点色，灰白背景保留卡片质感 */
+        :root {
+            --apple-deepblue: #0a5c8e;
+            --deepblue-hover: #084d77;
+            --gray-bg-page: #e8e8ed;
+            --card-bg: #ffffff;
+            --card-border: #d9d9df;
+            --text-primary: #1c1c1e;
+            --text-secondary: #6c6c70;
+            --separator: #c6c6c8;
+        }
+
+        /* 固定导航条 — 毛玻璃质感 */
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            background-color: rgba(255, 255, 255, 0.92);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .logo-area {
+            font-weight: 600;
+            font-size: 19px;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+        }
+
+        .logo-area span {
+            color: var(--apple-deepblue);
+            font-weight: 500;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            padding: 6px 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--apple-deepblue);
+            border-bottom-color: var(--apple-deepblue);
+        }
+
+        /* 全屏滚动分页 —— 每页刚好充满视口 */
+        .pages-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+            scroll-behavior: smooth;
+        }
+
+        .page {
+            scroll-snap-align: start;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 32px 64px 32px;
+            background: var(--gray-bg-page);
+        }
+
+        .page-content {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 卡片 - 白色背景，精致阴影留白 */
+        .insight-card {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 48px 56px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s;
+            border: 0.5px solid var(--card-border);
+        }
+
+        .grid-2cols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-top: 28px;
+        }
+
+        .col {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .section-title-lg {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .section-title-md {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
+        }
+
+        .badge-blue {
+            background: rgba(10, 92, 142, 0.1);
+            color: var(--apple-deepblue);
+            border-radius: 40px;
+            padding: 6px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .bullet-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .bullet-list li {
+            margin-bottom: 14px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: "•";
+            color: var(--apple-deepblue);
+            font-weight: 700;
+            position: absolute;
+            left: 4px;
+        }
+
+        .priority-tag {
+            background: white;
+            border-radius: 40px;
+            padding: 4px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 0.5px solid var(--separator);
+            color: var(--apple-deepblue);
+            display: inline-block;
+        }
+
+        /* 横排图片布局 (两个图片横向叠放) */
+        .img-row-horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin: 40px 0 20px;
+            justify-content: center;
+        }
+        .img-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 280px;
+            transition: transform 0.2s;
+            border: 0.5px solid var(--card-border);
+        }
+        .img-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            background: #f9f9fb;
+        }
+        .img-caption {
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            background: #fff;
+            border-top: 0.5px solid var(--card-border);
+        }
+
+        /* 交互切换 tab */
+        .tab-switch {
+            display: flex;
+            gap: 12px;
+            margin: 28px 0 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: 0.5px solid var(--separator);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        .tab-btn.active-tab {
+            background: var(--apple-deepblue);
+            color: white;
+            border-color: var(--apple-deepblue);
+        }
+        .tab-panel {
+            display: none;
+            background: #f9f9fb;
+            border-radius: 20px;
+            padding: 24px;
+            margin-top: 8px;
+            border: 0.5px solid var(--card-border);
+        }
+        .tab-panel.active-panel {
+            display: block;
+        }
+
+        /* 优化建议折叠 + 交互 */
+        .suggestion-item {
+            cursor: pointer;
+            transition: background 0.2s;
+            padding: 16px 20px;
+            border-radius: 20px;
+            background: #f9f9fb;
+            margin-bottom: 12px;
+            border: 0.5px solid var(--card-border);
+        }
+        .suggestion-item:hover {
+            background: #f0f0f2;
+            border-left: 3px solid var(--apple-deepblue);
+        }
+        .detail-hidden {
+            display: none;
+            margin-top: 14px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            padding-left: 12px;
+            border-left: 2px solid var(--apple-deepblue);
+        }
+
+        /* Figma 原型容器 */
+        .prototype-container {
+            margin: 32px 0 16px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            border: 0.5px solid var(--card-border);
+            background: #ffffff;
+        }
+        .prototype-frame {
+            width: 100%;
+            height: 480px;
+            border: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 28px 0 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            border-top: 0.5px solid var(--separator);
+            margin-top: 48px;
+        }
+
+        hr {
+            margin: 24px 0;
+            border: none;
+            border-top: 0.5px solid var(--separator);
+        }
+
+        @media (max-width: 780px) {
+            .page { padding: 100px 20px 60px; }
+            .section-title-lg { font-size: 36px; }
+            .insight-card { padding: 28px; }
+            .nav-links { gap: 16px; }
+            .prototype-frame { height: 360px; }
+        }
+    </style>
+</head>
+<body>
+<div class="nav-fixed">
+    <div class="nav-container">
+        <div class="logo-area">百词斩 · <span>产品分析报告</span></div>
+        <div class="nav-links" id="navLinks">
+            <a class="nav-link" data-page="0">核心摘要</a>
+            <a class="nav-link" data-page="1">用户洞察</a>
+            <a class="nav-link" data-page="2">拼写环节分析</a>
+            <a class="nav-link" data-page="3">详情页交互分析</a>
+            <a class="nav-link" data-page="4">内测与深色模式</a>
+            <a class="nav-link" data-page="5">结论与路线</a>
+        </div>
+    </div>
+</div>
+
+<div class="pages-container" id="pagesContainer">
+    <!-- 页面0: 核心摘要  无图片 -->
+    <div class="page" data-index="0">
+        <div class="page-content">
+            <div class="insight-card">
+                <span class="badge-blue">百词斩 7.10.10–7.10.12 深度体验</span>
+                <div class="section-title-lg">核心摘要</div>
+                <div class="grid-2cols">
+                    <div class="col">
+                        <p style="font-weight:500; margin-bottom:14px;">主要发现</p>
+                        <ul class="bullet-list">
+                            <li>拼写环节“点击提示即判错”存在明确用户预期违背，影响完成率。</li>
+                            <li>单词详情页仍采用“点击切换”，不符合移动端主流下滑习惯。</li>
+                            <li>内测版本向低龄化、游戏化倾斜，需警惕疏远原有核心用户的风险。</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <p style="font-weight:500; margin-bottom:14px;">优化优先级</p>
+                        <div style="margin-bottom:12px;"><span class="priority-tag">P0</span> 拼写提示逻辑优化</div>
+                        <div style="margin-bottom:12px;"><span class="priority-tag">P1</span> 详情页改下滑式浏览</div>
+                        <div style="margin-bottom:12px;"><span class="priority-tag">P1</span> 增设夜间深色模式</div>
+                        <p style="margin-top: 24px; font-size:14px; color:var(--text-secondary);">基于AppStore评价、用户访谈、内测追踪</p>
+                    </div>
+                </div>
+                <hr>
+                <div style="margin-top: 16px;">
+                    <p style="font-weight:500; margin-bottom:8px;">分析背景</p>
+                    <p style="color: var(--text-secondary); font-size: 14px;">产品版本: 7.10.10 – 7.10.12 及内测分支 | 体验设备: iPhone 14 Pro Max | 数据来源: 七麦数据、百度百科、小红书、艾瑞指数、AppStore</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面1: 用户分析 - 横排两张图片，删除了小红书那张 -->
+    <div class="page" data-index="1">
+        <div class="page-content">
+            <div class="insight-card">
+                <span class="badge-blue">目标群体 · 备考年轻化</span>
+                <div class="section-title-md">用户画像与市场表现</div>
+                <div class="grid-2cols">
+                    <div class="col">
+                        <p><strong>目标用户</strong><br>百词斩副标题“深度模式，专为备考而生”，主要目标为考试党。50%以上用户集中在30岁以下，24岁以下为主，多大学生备考四六级、考研。女性用户52.93%，略高于同类APP。</p>
+                        <p style="margin-top: 20px;"><strong>特征成因</strong><br>广东、山东等高考大省集中，图解记忆生动有趣。小红书K-POP运营及抽象文案吸引年轻女性，提升传播度。</p>
+                    </div>
+                    <div class="col">
+                        <p><strong>AppStore 4.8分 (171万评分)</strong><br>7.10.12版本差评集中：界面花哨、VIP功能增加、拼写键盘难用、小语种输入问题。好评多来自低龄用户，认可图记模式及打卡社交。</p>
+                        <div class="tab-switch">
+                            <button class="tab-btn active-tab" data-tab="tabNeed1">基本需求</button>
+                            <button class="tab-btn" data-tab="tabNeed2">期望型需求</button>
+                            <button class="tab-btn" data-tab="tabNeed3">潜在需求</button>
+                        </div>
+                        <div id="tabNeed1" class="tab-panel active-panel">高效、快速背单词，提高词汇量以通过考试。</div>
+                        <div id="tabNeed2" class="tab-panel">高效利用碎片化时间，低压力、趣味性。</div>
+                        <div id="tabNeed3" class="tab-panel">激发英语学习兴趣，主动探索学习。</div>
+                    </div>
+                </div>
+                <!-- 横向叠放两张图片（删除了小红书运营图） -->
+                <div class="img-row-horizontal">
+                    <div class="img-card">
+                        <img src="/Users/apple/Desktop/bczProdctRsrch/图片2.png" alt="性别年龄占比" onerror="this.src='https://placehold.co/600x300?text=性别年龄分布';this.onerror=null">
+                        <div class="img-caption">女性占比52.93% · 18-24岁为主力</div>
+                    </div>
+                    <div class="img-card">
+                        <img src="/Users/apple/Desktop/bczProdctRsrch/图片3.png" alt="地域分布" onerror="this.src='https://placehold.co/600x300?text=广东山东占比高'">
+                        <div class="img-caption">广东、山东等高考大省用户集中</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面2: 拼写环节分析 (独立页面) -->
+    <div class="page" data-index="2">
+        <div class="page-content">
+            <div class="insight-card">
+                <span class="badge-blue">核心流程 · 体验断层</span>
+                <div class="section-title-md">拼写环节提示陷阱</div>
+                <div class="grid-2cols">
+                    <div class="col">
+                        <p style="font-weight:500; margin-bottom:16px;">问题描述</p>
+                        <p>拼写模式下点击【灯泡】仅播放发音并展示音标，系统自动判为拼写错误。功能与喇叭相似但导致新用户误解。“点击提示即判错”违背用户预期，容易造成抵触心理，影响拼写环节的完成率和用户体验。</p>
+                        <div class="suggestion-item" id="spellHint" style="margin-top: 28px;">
+                            <strong>优化方案 (点击展开)</strong>
+                            <div class="detail-hidden" id="spellDetail">将提示改为填空模式：展示单词部分字母 + 发音，用户补充剩余字母，避免自动判错。同时扩大键盘有效区域，支持系统键盘切换，修复小语种输入法问题。</div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="prototype-container">
+                            <img src="/Users/apple/Desktop/bczProdctRsrch/1拼写功能改进.png" alt="拼写改进示意" style="width:100%; border-radius: 20px;" onerror="this.src='https://placehold.co/500x300?text=拼写填空设计'">
+                        </div>
+                        <p style="font-size:13px; color:var(--text-secondary); text-align:center;">拼写环节改进示意：填空式提示原型</p>
+                    </div>
+                </div>
+                <hr>
+                <div style="margin-top: 20px;">
+                    <p style="font-weight:500; margin-bottom:8px;">用户反馈引用</p>
+                    <p style="color: var(--text-secondary); font-size: 14px;">AppStore 评论: “拼写部分键盘和光标无法调整、小语种无法切换输入法”<br>“点击提示直接被判错，感觉不公平。”</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面3: 详情页交互分析 (独立页面 + Figma 原型) -->
+    <div class="page" data-index="3">
+        <div class="page-content">
+            <div class="insight-card">
+                <span class="badge-blue">信息架构 · 交互过时</span>
+                <div class="section-title-md">单词详情页下滑式改造</div>
+                <div class="grid-2cols">
+                    <div class="col">
+                        <p style="font-weight:500; margin-bottom:16px;">当前问题</p>
+                        <p>单词完整释义页面下方的词组搭配、派生词、英文释义、近义词、形近词等功能采用「点击切换」标签页设计。这种模式不符合当前移动端用户下滑浏览更多信息的直觉习惯，用户需要额外点击才能浏览不同模块，信息曝光效率低，认知负担较高。</p>
+                        <p style="margin-top: 20px;"><strong>建议改造方向</strong><br>按查看频次竖向排列（助记 → 例句 → 词组搭配 → 派生词 → 近义词/形近词），保留顶部快速导航锚点，支持平滑下滑浏览，一次性展示全部模块，提升信息可发现性。</p>
+                    </div>
+                    <div class="col">
+                        <div class="prototype-container">
+                            <iframe class="prototype-frame" src="https://www.figma.com/proto/AW7hjU8HU2shpKGbmPdXlR/%E7%99%BE%E8%AF%8D%E6%96%A9?node-id=33-9&t=2K0Oa8GxygyvrwbH-1&scaling=contain&page-id=0%3A1&embed_host=share" allowfullscreen></iframe>
+                        </div>
+                        <p style="font-size:13px; color:var(--text-secondary); text-align:center;">交互原型：下滑式单词详情页 (Figma)</p>
+                    </div>
+                </div>
+                <hr>
+                <div style="margin-top: 20px;">
+                    <p style="font-weight:500; margin-bottom:8px;">体验预期</p>
+                    <p style="color: var(--text-secondary); font-size: 14px;">用户无需学习新交互，下滑即可浏览全部扩展内容，降低学习成本，符合 iOS / Android 主流浏览模式。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面4: 内测版本与深色模式建议 (移除图片，仅保留P1深色模式) -->
+    <div class="page" data-index="4">
+        <div class="page-content">
+            <div class="insight-card">
+                <span class="badge-blue">内测版 7.12.x · 调性观察</span>
+                <div class="section-title-md">版本迭代与深色模式建议</div>
+                <div class="grid-2cols">
+                    <div class="col">
+                        <p><strong>内测主要变化</strong><br>动态矩阵、动画图标、背单词小游戏；主题色变为浅蓝；首次选择正确即跳过释义页直达下一个单词；拼写改用系统键盘，提示音标可手动显示。</p>
+                        <p style="margin-top: 20px;"><strong>潜在风险</strong><br>AppStore评论区“界面花哨、不如以前简洁”等负面反馈集中于7.10.12版本之后。内测版本进一步向低龄化、游戏化倾斜，可能疏远原有核心用户（大学生、备考成人）。建议通过灰度策略保留“经典模式”开关，满足不同年龄段偏好。</p>
+                    </div>
+                    <div class="col">
+                        <div class="tab-switch" style="margin-top: 0;">
+                            <button class="tab-btn active-tab" data-sug="sugDark">P1 深色模式建议</button>
+                        </div>
+                        <div id="sugDark" class="tab-panel active-panel">
+                            <p style="font-weight:500; margin-bottom:12px;">夜间深色模式 (P1优先级)</p>
+                            <p>用户评价中平均每周都有不同用户反馈屏幕过亮、晃眼问题。很多大学生、上班族倾向于将背单词的时间安排在睡前，增设深色模式便于用户晚间使用，缓解眼部疲劳。建议适配 iOS / Android 深色主题，提供自动跟随系统或手动切换选项，提升基础体验完整性。</p>
+                            <div style="margin-top: 20px; background:#f0f0f2; padding: 16px; border-radius: 20px; font-size:14px;">
+                                <span class="priority-tag" style="background:var(--apple-deepblue); color:white; border:none;">P1 推荐</span>
+                                <span style="margin-left: 8px;">深色模式属于现代应用基础配置，补齐后能有效提升口碑。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div style="margin-top: 20px;">
+                    <p style="font-weight:500; margin-bottom:8px;">战略建议</p>
+                    <p style="color: var(--text-secondary); font-size: 14px;">为平衡不同年龄用户，可设计“极简专业模式”与“趣味游戏模式”两个皮肤/功能开关，尊重用户自主选择权，避免一刀切的改版导致核心备考人群流失。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面5: 结论与路线图 (去掉所有图片) -->
+    <div class="page" data-index="5">
+        <div class="page-content">
+            <div class="insight-card">
+                <span class="badge-blue">最终结论 · 体验断层与护城河</span>
+                <div class="section-title-md">优化路线图与产品走向</div>
+                <div class="grid-2cols">
+                    <div class="col">
+                        <p><strong>核心结论</strong><br>百词斩核心竞争力在于图片联想降低记忆门槛 + 自营硬件/课程商业化闭环。但当前存在两个明确的体验断层：拼写提示逻辑违背预期、详情页交互陈旧。内测版本向低龄化倾斜，需警惕核心备考用户流失风险。</p>
+                        <p style="margin-top: 20px;"><strong>优先级路线</strong></p>
+                        <ul class="bullet-list">
+                            <li><span class="priority-tag" style="margin-right:8px;">P0</span> 拼写提示逻辑优化（填空式提示 + 键盘修复）</li>
+                            <li><span class="priority-tag" style="margin-right:8px;">P1</span> 详情页改下滑式浏览（竖向排列 + 导航锚点）</li>
+                            <li><span class="priority-tag" style="margin-right:8px;">P1</span> 增设夜间深色模式（适配系统深色主题）</li>
+                            <li><span class="priority-tag" style="margin-right:8px;">战略</span> 保留经典极简模式开关，避免强制低龄化改版</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <div class="insight-card" style="background:#f9f9fb; border:0.5px solid var(--card-border); padding:24px;">
+                            <p style="font-weight:600">用户口碑亮点</p>
+                            <p style="font-size: 14px;">图记有趣，铜板打卡有成就感；硬件值得信赖，品牌忠诚度高。</p>
+                            <hr style="margin:16px 0;">
+                            <p style="font-weight:600">差评焦点</p>
+                            <p style="font-size: 14px;">拼写判错离谱、更新后界面花哨、VIP功能增多、键盘不灵敏、小语种输入法问题。</p>
+                        </div>
+                        <p style="margin-top: 24px; font-size: 14px; color: var(--text-secondary);">基于七麦数据、AppStore分析、小红书用户反馈，百词斩需在保持趣味的同时加固核心备考场景的专业效率体验，持续打磨基础交互，以维持头部地位。</p>
+                    </div>
+                </div>
+                <footer style="margin-top: 32px;">报告基于百词斩7.10.10-7.10.12及内测版 · 分析时间2026.5 · 数据来源:七麦/百度百科/小红书/AppStore/艾瑞指数</footer>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 页面滚动 + 导航激活
+    const pages = document.querySelectorAll('.page');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const container = document.getElementById('pagesContainer');
+
+    function updateActiveNav(index) {
+        navLinks.forEach(link => {
+            const pageIdx = parseInt(link.getAttribute('data-page'));
+            if (pageIdx === index) link.classList.add('active');
+            else link.classList.remove('active');
+        });
+    }
+
+    function scrollToPage(index) {
+        if (pages[index]) {
+            pages[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            updateActiveNav(index);
+        }
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const idx = parseInt(link.getAttribute('data-page'));
+            scrollToPage(idx);
+        });
+    });
+
+    let scrollTimer;
+    container.addEventListener('scroll', () => {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+            let active = 0;
+            const scrollTop = container.scrollTop;
+            pages.forEach((page, i) => {
+                const offset = page.offsetTop;
+                if (scrollTop >= offset - 120) active = i;
+            });
+            updateActiveNav(active);
+        }, 50);
+    });
+
+    // Tab 切换逻辑 (用户需求tab)
+    const allTabBtns = document.querySelectorAll('.tab-btn[data-tab]');
+    allTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-tab');
+            const parentCard = btn.closest('.insight-card');
+            const panels = parentCard.querySelectorAll('.tab-panel');
+            panels.forEach(p => p.classList.remove('active-panel'));
+            const targetPanel = parentCard.querySelector(`#${target}`);
+            if (targetPanel) targetPanel.classList.add('active-panel');
+            const btnsGroup = parentCard.querySelectorAll('.tab-btn');
+            btnsGroup.forEach(b => b.classList.remove('active-tab'));
+            btn.classList.add('active-tab');
+        });
+    });
+
+    // 内测页面深色模式面板无需多余逻辑
+    const darkPanel = document.getElementById('sugDark');
+    if(darkPanel) darkPanel.classList.add('active-panel');
+
+    // 拼写折叠详情
+    const spellItem = document.getElementById('spellHint');
+    if(spellItem) {
+        spellItem.addEventListener('click', () => {
+            const detail = document.getElementById('spellDetail');
+            if (detail.style.display === 'none' || !detail.style.display) detail.style.display = 'block';
+            else detail.style.display = 'none';
+        });
+        const detailElem = document.getElementById('spellDetail');
+        if(detailElem) detailElem.style.display = 'none';
+    }
+    updateActiveNav(0);
+</script>
+</body>
+</html>
