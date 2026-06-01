@@ -13,14 +13,13 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background-color: #e8e8ed; /* 灰色背景凸显高级感 */
+            background-color: #e8e8ed;
             color: #1c1c1e;
             line-height: 1.5;
             scroll-behavior: smooth;
             overflow-x: hidden;
         }
 
-        /* 深蓝作为重点色，灰白背景保留卡片质感 */
         :root {
             --apple-deepblue: #0a5c8e;
             --deepblue-hover: #084d77;
@@ -32,7 +31,6 @@
             --separator: #c6c6c8;
         }
 
-        /* 固定导航条 — 毛玻璃质感 */
         .nav-fixed {
             position: fixed;
             top: 0;
@@ -88,7 +86,6 @@
             border-bottom-color: var(--apple-deepblue);
         }
 
-        /* 全屏滚动分页 —— 每页刚好充满视口 */
         .pages-container {
             scroll-snap-type: y mandatory;
             overflow-y: scroll;
@@ -113,7 +110,6 @@
             margin: 0 auto;
         }
 
-        /* 卡片 - 白色背景，精致阴影留白 */
         .insight-card {
             background: var(--card-bg);
             border-radius: 28px;
@@ -191,7 +187,6 @@
             display: inline-block;
         }
 
-        /* 横排图片布局 (两个图片横向叠放) */
         .img-row-horizontal {
             display: flex;
             flex-wrap: wrap;
@@ -225,7 +220,6 @@
             border-top: 0.5px solid var(--card-border);
         }
 
-        /* 交互切换 tab */
         .tab-switch {
             display: flex;
             gap: 12px;
@@ -260,7 +254,6 @@
             display: block;
         }
 
-        /* 优化建议折叠 + 交互 */
         .suggestion-item {
             cursor: pointer;
             transition: background 0.2s;
@@ -283,7 +276,6 @@
             border-left: 2px solid var(--apple-deepblue);
         }
 
-        /* Figma 原型容器 */
         .prototype-container {
             margin: 32px 0 16px;
             border-radius: 24px;
@@ -338,7 +330,7 @@
 </div>
 
 <div class="pages-container" id="pagesContainer">
-    <!-- 页面0: 核心摘要  无图片 -->
+    <!-- 页面0: 核心摘要 -->
     <div class="page" data-index="0">
         <div class="page-content">
             <div class="insight-card">
@@ -370,7 +362,7 @@
         </div>
     </div>
 
-    <!-- 页面1: 用户分析 - 横排两张图片，删除了小红书那张 -->
+    <!-- 页面1: 用户分析 - 横排两张图片 -->
     <div class="page" data-index="1">
         <div class="page-content">
             <div class="insight-card">
@@ -393,14 +385,14 @@
                         <div id="tabNeed3" class="tab-panel">激发英语学习兴趣，主动探索学习。</div>
                     </div>
                 </div>
-                <!-- 横向叠放两张图片（删除了小红书运营图） -->
+                <!-- 横向叠放两张图片（相对路径） -->
                 <div class="img-row-horizontal">
                     <div class="img-card">
-                        <img src="/Users/apple/Desktop/bczProdctRsrch/图片2.png" alt="性别年龄占比" onerror="this.src='https://placehold.co/600x300?text=性别年龄分布';this.onerror=null">
+                        <img src="bczProdctRsrch/图片2.png" alt="性别年龄占比" onerror="this.src='https://placehold.co/600x300?text=性别年龄分布';this.onerror=null">
                         <div class="img-caption">女性占比52.93% · 18-24岁为主力</div>
                     </div>
                     <div class="img-card">
-                        <img src="/Users/apple/Desktop/bczProdctRsrch/图片3.png" alt="地域分布" onerror="this.src='https://placehold.co/600x300?text=广东山东占比高'">
+                        <img src="bczProdctRsrch/图片3.png" alt="地域分布" onerror="this.src='https://placehold.co/600x300?text=广东山东占比高'">
                         <div class="img-caption">广东、山东等高考大省用户集中</div>
                     </div>
                 </div>
@@ -408,7 +400,7 @@
         </div>
     </div>
 
-    <!-- 页面2: 拼写环节分析 (独立页面) -->
+    <!-- 页面2: 拼写环节分析 -->
     <div class="page" data-index="2">
         <div class="page-content">
             <div class="insight-card">
@@ -425,7 +417,7 @@
                     </div>
                     <div class="col">
                         <div class="prototype-container">
-                            <img src="/Users/apple/Desktop/bczProdctRsrch/1拼写功能改进.png" alt="拼写改进示意" style="width:100%; border-radius: 20px;" onerror="this.src='https://placehold.co/500x300?text=拼写填空设计'">
+                            <img src="bczProdctRsrch/1拼写功能改进.png" alt="拼写改进示意" style="width:100%; border-radius: 20px;" onerror="this.src='https://placehold.co/500x300?text=拼写填空设计'">
                         </div>
                         <p style="font-size:13px; color:var(--text-secondary); text-align:center;">拼写环节改进示意：填空式提示原型</p>
                     </div>
@@ -439,7 +431,7 @@
         </div>
     </div>
 
-    <!-- 页面3: 详情页交互分析 (独立页面 + Figma 原型) -->
+    <!-- 页面3: 详情页交互分析 (Figma 原型) -->
     <div class="page" data-index="3">
         <div class="page-content">
             <div class="insight-card">
@@ -467,7 +459,7 @@
         </div>
     </div>
 
-    <!-- 页面4: 内测版本与深色模式建议 (移除图片，仅保留P1深色模式) -->
+    <!-- 页面4: 内测版本与深色模式建议 -->
     <div class="page" data-index="4">
         <div class="page-content">
             <div class="insight-card">
@@ -501,7 +493,7 @@
         </div>
     </div>
 
-    <!-- 页面5: 结论与路线图 (去掉所有图片) -->
+    <!-- 页面5: 结论与路线图 -->
     <div class="page" data-index="5">
         <div class="page-content">
             <div class="insight-card">
@@ -578,7 +570,7 @@
         }, 50);
     });
 
-    // Tab 切换逻辑 (用户需求tab)
+    // Tab 切换逻辑
     const allTabBtns = document.querySelectorAll('.tab-btn[data-tab]');
     allTabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -594,7 +586,7 @@
         });
     });
 
-    // 内测页面深色模式面板无需多余逻辑
+    // 深色模式面板
     const darkPanel = document.getElementById('sugDark');
     if(darkPanel) darkPanel.classList.add('active-panel');
 
